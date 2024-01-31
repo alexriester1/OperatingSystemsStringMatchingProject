@@ -209,8 +209,8 @@ int main() {
         if (firstWord == "exit") {
             break;
         }
-
-        std::string wordClass = matchString(firstWord);
+        std::string noCommentsLine = removeComments(firstWord);
+        std::string wordClass = matchString(noCommentsLine);
         std::cout << firstWord << ": " << wordClass << std::endl;
     }
 
