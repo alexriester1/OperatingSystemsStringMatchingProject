@@ -4,6 +4,14 @@
 #include <unordered_map>
 #include <vector>
 
+std::string getFirstWord(const std::string& line) {
+    size_t pos = line.find_first_not_of(" \t");
+    if (pos == std::string::npos) return "";
+
+    size_t end = line.find_first_of(" \t", pos);
+    return line.substr(pos, end - pos);
+}
+
 static std::unordered_map<std::string, std::string> dictionary() {
     std::unordered_map<std::string, std::string> dict;
     dict["cat"] = "noun";
@@ -39,12 +47,11 @@ static std::unordered_map<std::string, std::string> dictionary() {
     return dict;
 }
 
-std::vector<std::string> matchString(std::string entry) {
+std::string matchString(std::string entry) {
     std::string word;
     std::string keys;
     std::vector<std::string> values;
     std::vector<std::string> words;
-
     for (int i = 0; i <= entry.size(); i++) {
         if (!isspace(entry[i])) {
             keys = keys + entry[i];
@@ -57,6 +64,7 @@ std::vector<std::string> matchString(std::string entry) {
                 word = "\n Word: " + x.first + " " + "Category: " + x.second + "\n";
                 words.push_back(word);
                 //std::cout<<word;
+                break;
                 keys = "";
             }
             else
@@ -69,7 +77,7 @@ std::vector<std::string> matchString(std::string entry) {
         std::cout << words[i];
     }
 
-    return words;
+    return word;
 }
 
 static int count(std::string str, char countChar) {
@@ -175,32 +183,52 @@ std::vector<std::string> readFileIntoVector(std::string fileName) {
 int main() {
     std::vector<std::string> answer;
     std::vector<std::string> inputLines = readFileIntoVector("InputFile.txt");
-    //Opens file, error handling for if the file can't open
-    std::ifstream inputFile("InputFile.txt");
-    if (!inputFile.is_open()) {
-        std::cerr << "Failed to open input file." << std::endl;
-        return 1;
-    }
-    for (size_t i = 0; i < inputLines.size(); i++) {
-        matchString(inputLines[i]);
+    std::string line, partialLine;
+    bool continueLine = false;
+    while (true) {
+        std::cout << (continueLine ? ">>> " : "ALPHA $ ");
+        std::getline(std::cin, line);
+
+        if (continueLine) {
+            partialLine += line;
+        }
+        else {
+            partialLine = line;
+        }
+
+        if (!partialLine.empty() && partialLine.size() >= 2 && partialLine.substr(partialLine.size() - 2) == "\\n") {
+            partialLine.erase(partialLine.size() - 2); // Remove the "\n"
+            continueLine = true;
+            continue; // Skip the rest of the loop
+        }
+
+        continueLine = false;
+
+        std::string firstWord = getFirstWord(partialLine);
+
+        if (firstWord == "exit") {
+            break;
+        }
+
+        std::string wordClass = matchString(firstWord);
+        std::cout << firstWord << ": " << wordClass << std::endl;
     }
 
-    // 1. Various consecutive blank characters are identical to single space character.
-    //Initializes string and boolean, loops through file by character.
-    //If character is space, mark boolean as true and skip. Testing using cout to ensure it's only counting one space.
-    //If character is not space, mark boolean as false and read as normal. Testing using cout.
-    std::string line;
-    while (std::getline(inputFile, line)) {
-        bool lastCharSpace = false;
-        for (char& c : line) {
-            if (std::isspace(c)) {
-                lastCharSpace = true;
-                std::cout << c;
-                continue;
-            }
-            std::cout << c;
-            lastCharSpace = false;
-        }
-    }
+    /*for (size_t i = 0; i < inputLines.size(); i++) {
+      matchString(inputLines[i]);
+    }*/
+
 }
 
+// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
+// Debug program: F5 or Debug > Start Debugging menu
+
+// Tips for Getting Started:
+//   1. Use the Solution Explorer window to add/manage files
+//   2. Use the Team Explorer window to connect to source control
+//   3. Use the Output window to see build output and other messages
+//   4. Use the Error List window to view errors
+//   5. Go to Project > Add New Item to create new code files, or Project > Add
+//   Existing Item to add existing code files to the project
+//   6. In the future, to open this project again, go to File > Open > Project
+//   and select the .sln file
