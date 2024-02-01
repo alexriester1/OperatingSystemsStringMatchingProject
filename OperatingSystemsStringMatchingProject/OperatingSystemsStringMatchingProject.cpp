@@ -3,6 +3,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <regex>
 
 std::string getFirstWord(const std::string& line) {
     size_t pos = line.find_first_not_of(" \t");
@@ -92,8 +93,31 @@ static int count(std::string str, char countChar) {
     return count;
 }
 
-static std::string removeComments(std::string str) {
-    int start = 0;
+static std::string formatString(std::string str) {
+    
+    
+
+    // Removes consecutive spaces
+
+    bool lastCharSpace = false;
+
+    for (size_t i = 0; i < str.length(); i++)
+    {
+        if (std::isspace(str[i]) && !lastCharSpace)
+        {
+            lastCharSpace = true;
+        }
+        else if (std::isspace(str[i]) && lastCharSpace)
+        {
+            str.erase(str.begin() + i);
+            i--;
+        }
+        else {
+            lastCharSpace = false;
+        }
+    }
+
+    
     /*
 
     base case: pdLoc == -1; return str
@@ -102,6 +126,9 @@ static std::string removeComments(std::string str) {
     3. if both are even, return str.substr(0, pdLoc)
     4. if either is odd, move start up to pdLoc
     */
+
+    int start = 0;
+
     while (true) {
 
         int pdLoc = str.find('#', start);
@@ -119,75 +146,15 @@ static std::string removeComments(std::string str) {
     }
 }
 
-std::vector<std::string> readFileIntoVector(std::string fileName) {
-
-    std::vector<std::string> lines;
-    std::string currLine;
-
-    // Read from the text file
-    std::ifstream inputFile(fileName);
-
-    if (!inputFile.is_open()) {
-        std::cerr << "Error opening file: " << fileName << std::endl;
-    }
-
-    bool concatWithLast = false;
-
-    while (getline(inputFile, currLine)) {
-        // 1. Various consecutive blank characters (space and tab) are identical to
-        // a single space character.
-
-        /*
-        3. A pond-sign character (#) and its following characters up to a newline
-        character are ignored unless the pond-sign character is not surrounded by a
-        pair of single quotes or a pair of double quotes. It is called a “comment”.
-        Of course, after ignoring the character and its followings, if the line
-        contains only blank characters, the line is completely ignored.
-
-        */
-
-        currLine = removeComments(currLine);
-
-        /*
-        4. A line ending with a backslash and a newline character without
-        interruption between them is called “continuation”. If a line ends with the
-        continuation, the next line is concatenated to the current line. Be aware
-        that a line ending with a comment cannot contain a continuation
-        */
-
-        if (concatWithLast) {
-            currLine = lines.back() + currLine;
-            lines.pop_back();
-            concatWithLast = false;
-        }
-
-        if (!(currLine.empty()) && currLine.back() == '\\') {
-            {
-                concatWithLast = true;
-                currLine.pop_back();
-            }
-        }
-
-        // 2. A blank line is ignored.
-        if (currLine.find_first_not_of(' ') != std::string::npos) {
-            lines.push_back(currLine);
-        }
-    }
-
-    // Close the file
-    inputFile.close();
-
-    return lines;
-}
-
 int main() {
     std::vector<std::string> answer;
-    std::vector<std::string> inputLines = readFileIntoVector("InputFile.txt");
     std::string line, partialLine;
     bool continueLine = false;
     while (true) {
         std::cout << (continueLine ? ">>> " : "ALPHA $ ");
         std::getline(std::cin, line);
+
+        line = formatString(line);
 
         if (continueLine) {
             partialLine += line;
@@ -196,8 +163,8 @@ int main() {
             partialLine = line;
         }
 
-        if (!partialLine.empty() && partialLine.size() >= 2 && partialLine.substr(partialLine.size() - 2) == "\\n") {
-            partialLine.erase(partialLine.size() - 2); // Remove the "\n"
+        if (!partialLine.empty() && partialLine.size() >= 2 && partialLine.back() == '\\') {
+            partialLine.erase(partialLine.size() - 1); // Remove the "\n"
             continueLine = true;
             continue; // Skip the rest of the loop
         }
@@ -209,26 +176,10 @@ int main() {
         if (firstWord == "exit") {
             break;
         }
-        std::string noCommentsLine = removeComments(firstWord);
-        std::string wordClass = matchString(noCommentsLine);
+        std::string wordClass = matchString(line);
         std::cout << firstWord << ": " << wordClass << std::endl;
     }
 
-    /*for (size_t i = 0; i < inputLines.size(); i++) {
-      matchString(inputLines[i]);
-    }*/
-
 }
 
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
 
-// Tips for Getting Started:
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add
-//   Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project
-//   and select the .sln file
