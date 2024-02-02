@@ -50,8 +50,6 @@ static std::unordered_map<std::string, std::string> dictionary() {
 }
 
 std::string matchString(std::string entry) {
-    //one string var to be a temp string (keys) to add chars
-    //one string var to return the category type of a word(word) 
     std::string word;
     std::string keys;
     //vector to hold matched words fromd dictionary
@@ -60,30 +58,30 @@ std::string matchString(std::string entry) {
     for (int i = 0; i <= entry.size(); i++) {
         //checks for spaces
         if (!isspace(entry[i])) {
+            //adds char from first word to temp string
             keys = keys + entry[i];
         }
-        else {
-            keys = "";
-        }
+        //for loop cycles through dictionary and compares it to the current temp string 
         for (auto x : dictionary()) {
+            //if it is a match it will return the category of the word to the words vector
             if (keys == x.first) {
-                word = "\n Word: " + x.first + " " + "Category: " + x.second + "\n";
+                word = x.second + "\n";
+                //adds it to the string vector
                 words.push_back(word);
-                //std::cout<<word;
-                break;
+                //resets temp string
                 keys = "";
             }
-            else
-                word = "\n Category: external\n";
+            else {
+                //if it is not a match it returns default external class
+                word = "external\n";
+            }
+
         }
     }
-
-
-    for (int i = 0; i < words.size(); i++) {
-        std::cout << words[i];
-    }
-
-    return word;
+    //adds default extenral to string vector
+    words.push_back(word);
+    //returns first word class
+    return words.at(0);
 }
 
 static int count(std::string str, char countChar) {
