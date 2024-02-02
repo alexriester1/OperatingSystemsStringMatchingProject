@@ -14,6 +14,7 @@ std::string getFirstWord(const std::string& line) {
 }
 
 static std::unordered_map<std::string, std::string> dictionary() {
+    //unordered map to return a dictionary of words and the class type : noun, verb or pronoun
     std::unordered_map<std::string, std::string> dict;
     dict["cat"] = "noun";
     dict["dog"] = "noun";
@@ -49,11 +50,15 @@ static std::unordered_map<std::string, std::string> dictionary() {
 }
 
 std::string matchString(std::string entry) {
+    //one string var to be a temp string (keys) to add chars
+    //one string var to return the category type of a word(word) 
     std::string word;
     std::string keys;
-    std::vector<std::string> values;
+    //vector to hold matched words fromd dictionary
     std::vector<std::string> words;
+    //for loop cycles through the entire first word entry from user
     for (int i = 0; i <= entry.size(); i++) {
+        //checks for spaces
         if (!isspace(entry[i])) {
             keys = keys + entry[i];
         }
